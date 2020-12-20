@@ -45,6 +45,7 @@ function genRandomFileName(fileName = '') {
 function saveFiles(req) {
     return new Promise((resolve, reject) => {
         const imgLinks = []
+        const imgAlts = {}
         const form = formidable({ multiples: true })
 
         // windows 系统，处理 rename 报错
@@ -81,6 +82,7 @@ function saveFiles(req) {
                 fs.renameSync(tempFilePath, fullFileName)
                 // 存储链接
                 const url = `/server/${FILE_FOLDER}/` + fileName
+                imgAlts[url] = fileName
                 imgLinks.push(url)
             })
             console.log('imgLinks...', imgLinks)
@@ -89,6 +91,7 @@ function saveFiles(req) {
             resolve({
                 errno: 0,
                 data: imgLinks,
+                imgAlts,
             })
         })
     })

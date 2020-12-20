@@ -11,6 +11,7 @@ import Progress from '../../editor/upload/progress'
 export type ResType = {
     errno: number | string
     data: string[]
+    imgAlts?: Record<string, string>
 }
 
 class UploadImg {
@@ -24,7 +25,7 @@ class UploadImg {
      * 往编辑区域插入图片
      * @param src 图片地址
      */
-    public insertImg(src: string): void {
+    public insertImg(src: string, alt?: string): void {
         const editor = this.editor
         const config = editor.config
 
@@ -34,7 +35,10 @@ class UploadImg {
         }
 
         // 先插入图片，无论是否能成功
-        editor.cmd.do('insertHTML', `<img src="${src}" style="max-width:100%;"/>`)
+        editor.cmd.do(
+            'insertHTML',
+            `<img src="${src}" alt="${alt || ''}" style="max-width:100%;"/>`
+        )
         // 执行回调函数
         config.linkImgCallback(src)
 
@@ -254,8 +258,9 @@ class UploadImg {
 
                     // 成功，插入图片
                     const data = result.data
+                    const imgAlts = result.imgAlts || {}
                     data.forEach(link => {
-                        this.insertImg(link)
+                        this.insertImg(link, imgAlts[link] || '')
                     })
 
                     // 钩子函数
@@ -279,7 +284,8 @@ class UploadImg {
                 reader.readAsDataURL(file)
                 reader.onload = function () {
                     if (!this.result) return
-                    _this.insertImg(this.result.toString())
+                    const imgLink = this.result.toString()
+                    _this.insertImg(imgLink, imgLink)
                 }
             })
         }
